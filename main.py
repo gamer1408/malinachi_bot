@@ -17,25 +17,7 @@ import asyncio
 import logging
 import sys
 import os
-import os
-from aiogram import Bot, Dispatcher
-# Aiohttp session ni import qilish kerak
-from aiogram.client.session.aiohttp import AiohttpSession 
 
-# Telegram Tokeningizni olasiz
-TOKEN = "SIZNING_BOT_TOKENINGIZ"
-
-# PythonAnywhere proksisini sozlash
-proxy_url = "http://proxy.server:3128"
-
-# Sessiyani proksi bilan yaratish
-session = AiohttpSession(proxy=proxy_url)
-
-# Botni shu sessiya bilan ishga tushirish
-bot = Bot(token=TOKEN, session=session)
-dp = Dispatcher()
-
-# ... qolgan kodlaringiz (routerlarni ulash va h.k.) ...
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
