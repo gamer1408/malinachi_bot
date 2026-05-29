@@ -2,21 +2,11 @@
 Malinachi.uz Telegram Bot
 =========================
 4-bosqich: To'liq ishlaydigan, Docker-tayyor versiya.
-
-Ishga tushirish:
-    python main.py
-    yoki
-    docker-compose up -d
-
-Talab qilinadigan fayllar:
-    .env             — BOT_TOKEN, ADMIN_CHANNEL_ID, GOOGLE_SHEET_ID
-    credentials.json — Google Service Account kaliti
 """
 
 import asyncio
 import logging
 import sys
-import os
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
@@ -28,29 +18,6 @@ from handlers.start import router as start_router
 from handlers.registration import router as registration_router
 from handlers.contact import router as contact_router
 from services.sheets import check_sheets_connection
-
-import os
-import json
-import gspread
-from google.oauth2.service_account import Credentials
-
-# 1. Railway'dagi o'zgaruvchidan JSON ma'lumotlarni string shaklida olamiz
-google_creds_json = os.environ.get("GOOGLE_CREDENTIALS")
-
-# 2. Stringni Python tushunadigan dictionary (lug'at) ga aylantiramiz
-creds_dict = json.loads(google_creds_json)
-
-# 3. Kredensiallarni yaratamiz
-scopes = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
-]
-credentials = Credentials.from_service_account_info(creds_dict, scopes=scopes)
-
-# 4. Google Sheets'ga ulanamiz
-gc = gspread.authorize(credentials)
-
-# ... qolgan kodlaringiz (masalan: sh = gc.open("Jadval_nomi")) ...
 
 # ─── Logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -64,10 +31,6 @@ logger = logging.getLogger(__name__)
 
 # ─── Muhit o'zgaruvchilarini tekshirish (startup dan oldin) ───────────────────
 def _check_env() -> None:
-    """
-    Zaruriy o'zgaruvchilar to'ldirilganligini tekshiradi.
-    Bo'sh bo'lsa — aniq xabar bilan dasturni to'xtatadi.
-    """
     errors = []
 
     if not config.BOT_TOKEN:
@@ -79,10 +42,11 @@ def _check_env() -> None:
     if not config.GOOGLE_SHEET_ID:
         errors.append("  ❌ GOOGLE_SHEET_ID — bo'sh! (Google Sheets URL dan oling)")
 
-    if not os.path.exists(config.GOOGLE_CREDENTIALS_FILE):
+    # MUHIM: Faylni emas, Railway'dagi matnni tekshiramiz!
+    if not config.GOOGLE_CREDENTIALS:
         errors.append(
-            f"  ❌ {config.GOOGLE_CREDENTIALS_FILE} — topilmadi! "
-            "(Google Cloud Console dan yuklab oling)"
+            "  ❌ GOOGLE_CREDENTIALS — topilmadi! "
+            "(Railway Variables ga JSON matnini kiriting)"
         )
 
     if errors:
@@ -92,7 +56,6 @@ def _check_env() -> None:
         for err in errors:
             logger.error(err)
         logger.error("=" * 55)
-        logger.error(".env faylini to'ldiring va qaytadan ishga tushiring.")
         sys.exit(1)
 
 
@@ -104,22 +67,15 @@ def _build_bot_and_dp() -> tuple[Bot, Dispatcher]:
     )
     dp = Dispatcher(storage=MemoryStorage())
 
-    # Router'larni ulash (tartib muhim!)
-    dp.include_router(start_router)         # /start → waiting_name
-    dp.include_router(registration_router)  # waiting_name → waiting_region → waiting_quantity
-    dp.include_router(contact_router)       # waiting_phone → yakunlash
+    dp.include_router(start_router)         
+    dp.include_router(registration_router)  
+    dp.include_router(contact_router)       
 
     return bot, dp
 
 
 # ─── Startup ───────────────────────────────────────────────────────────────────
 async def on_startup(bot: Bot) -> None:
-    """
-    Bot ishga tushganda:
-    1. Bot ma'lumotlarini chiqaradi
-    2. Google Sheets ulanishni tekshiradi — xato bo'lsa bot to'xtatiladi
-    """
-    # 1. Bot kimligini tekshir
     me = await bot.get_me()
     logger.info("=" * 55)
     logger.info("Bot ishga tushdi!")
@@ -128,7 +84,6 @@ async def on_startup(bot: Bot) -> None:
     logger.info("  ID      : %d", me.id)
     logger.info("=" * 55)
 
-    # 2. Google Sheets ulanishni tekshir
     logger.info("Google Sheets ulanish tekshirilmoqda...")
     sheets_ok = await check_sheets_connection()
 
@@ -136,16 +91,11 @@ async def on_startup(bot: Bot) -> None:
         logger.error("=" * 55)
         logger.error("KRITIK XATO: Google Sheets ga ulanib bo'lmadi!")
         logger.error("Quyidagilarni tekshiring:")
-        logger.error("  1. credentials.json fayli loyiha papkasida bormi?")
+        logger.error("  1. GOOGLE_CREDENTIALS Railway'ga to'g'ri kiritilganmi?")
         logger.error("  2. Service account emaili Sheets ga qo'shilganmi? (Editor)")
         logger.error("  3. GOOGLE_SHEET_ID to'g'rimi?")
-        logger.error("  4. Google Sheets API va Drive API yoqilganmi?")
         logger.error("=" * 55)
-        # Bot to'xtatiladi — noto'g'ri sozlama bilan ishlash xavfli
-        raise RuntimeError(
-            "Google Sheets ga ulanib bo'lmadi. "
-            "credentials.json va GOOGLE_SHEET_ID ni tekshiring."
-        )
+        raise RuntimeError("Google Sheets ga ulanib bo'lmadi.")
 
     logger.info("Barcha tekshiruvlar o'tdi ✓")
     logger.info("Bot buyurtmalarni qabul qilishga tayyor! 🍓")
@@ -161,12 +111,9 @@ async def on_shutdown(bot: Bot) -> None:
 
 # ─── Asosiy funksiya ───────────────────────────────────────────────────────────
 async def main() -> None:
-    # Muhit o'zgaruvchilarini tekshir (sinxron, tezkor)
     _check_env()
-
     bot, dp = _build_bot_and_dp()
 
-    # Startup/Shutdown hodisalarini bog'lash
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
 
@@ -181,7 +128,6 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except RuntimeError as e:
-        # on_startup dan kelgan xato (Google Sheets)
         logger.critical("Bot ishga tushirilmadi: %s", e)
         sys.exit(1)
     except KeyboardInterrupt:

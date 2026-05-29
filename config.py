@@ -9,7 +9,9 @@ ADMIN_CHANNEL_ID: int = int(os.getenv("ADMIN_CHANNEL_ID", "-1001234567890"))
 
 # ─── Google Sheets sozlamalari ─────────────────────────────────────────────────
 GOOGLE_SHEET_ID: str = os.getenv("GOOGLE_SHEET_ID", "")
-GOOGLE_CREDENTIALS_FILE: str = "credentials.json"
+
+# MUHIM O'ZGARISH: Fayl qidirish o'rniga Railway o'zgaruvchisini olamiz
+GOOGLE_CREDENTIALS: str = os.getenv("GOOGLE_CREDENTIALS", "")
 
 # ─── Viloyatlar ro'yxati (14 viloyat + Qoraqalpog'iston) ──────────────────────
 REGIONS: list[str] = [
@@ -56,7 +58,7 @@ class OrderStatus:
     CALLED   = "Qo'ng'iroq qilindi"
     DONE     = "Bajarildi"
     REJECTED = "Rad etildi"
-
+    
 
 # ─── Bot xabarlari (o'zbek tilida) ─────────────────────────────────────────────
 MESSAGES: dict[str, str] = {
@@ -106,9 +108,9 @@ if __name__ == "__main__":
         missing.append("BOT_TOKEN")
     if not GOOGLE_SHEET_ID:
         missing.append("GOOGLE_SHEET_ID")
+    if not GOOGLE_CREDENTIALS:
+        missing.append("GOOGLE_CREDENTIALS")
     if missing:
-        print(f"[!] .env faylida quyidagi o'zgaruvchilar to'ldirilmagan: {', '.join(missing)}")
+        print(f"[!] Muhit o'zgaruvchilari to'ldirilmagan: {', '.join(missing)}")
     else:
         print("[✓] Barcha muhit o'zgaruvchilari to'g'ri sozlangan.")
-    print(f"[i] Viloyatlar soni: {len(REGIONS)}")
-    print(f"[i] Ko'chat variantlari: {SEEDLING_QUANTITIES}")
