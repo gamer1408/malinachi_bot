@@ -11,7 +11,10 @@ Service account sozlash:
     3. Google Sheets → "Ulashish" → service account email ni qo'shing (Editor huquqi)
     4. .env ga GOOGLE_SHEET_ID ni to'ldiring
 """
-
+import json
+import gspread
+from google.oauth2.service_account import Credentials
+import config
 import logging
 from datetime import datetime, timezone, timedelta
 
@@ -169,6 +172,27 @@ async def save_to_sheets(user_data: dict) -> bool:
         logger.error("save_to_sheets kutilmagan xato: %s", exc, exc_info=True)
         return False
 
+async def check_sheets_connection():
+    try:
+        # Fayldan emas, Railway'dan (matndan) JSONni o'qiymiz
+        creds_dict = json.loads(config.GOOGLE_CREDENTIALS)
+
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive"
+        ]
+
+        credentials = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+        gc = gspread.authorize(credentials)
+        
+        # Test uchun jadvalni ochib ko'ramiz
+        sh = gc.open_by_key(config.GOOGLE_SHEET_ID)
+        return True
+        
+    except Exception as e:
+        import logging
+        logging.error(f"STARTUP XATO: Google Sheets ulanish xatosi: {e}")
+        return False
 
 async def check_sheets_connection() -> bool:
     """
