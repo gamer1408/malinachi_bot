@@ -29,6 +29,29 @@ from handlers.registration import router as registration_router
 from handlers.contact import router as contact_router
 from services.sheets import check_sheets_connection
 
+import os
+import json
+import gspread
+from google.oauth2.service_account import Credentials
+
+# 1. Railway'dagi o'zgaruvchidan JSON ma'lumotlarni string shaklida olamiz
+google_creds_json = os.environ.get("GOOGLE_CREDENTIALS")
+
+# 2. Stringni Python tushunadigan dictionary (lug'at) ga aylantiramiz
+creds_dict = json.loads(google_creds_json)
+
+# 3. Kredensiallarni yaratamiz
+scopes = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+credentials = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+
+# 4. Google Sheets'ga ulanamiz
+gc = gspread.authorize(credentials)
+
+# ... qolgan kodlaringiz (masalan: sh = gc.open("Jadval_nomi")) ...
+
 # ─── Logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
