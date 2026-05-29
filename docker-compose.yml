@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  malinachi_bot:
+    build: .
+    container_name: malinachi_bot
+    restart: always
+
+    # .env faylidan muhit o'zgaruvchilari
+    env_file:
+      - .env
+
+    # credentials.json ni konteynerga ulash (host fayldan)
+    volumes:
+      - ./credentials.json:/app/credentials.json:ro
+
+    # Loglarni ko'rish: docker-compose logs -f
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -1,0 +1,13 @@
+# Maxfiy fayllar — HECH QACHON git ga qo'shmang!
+.env
+credentials.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Docker
+*.log
