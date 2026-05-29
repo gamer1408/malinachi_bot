@@ -175,6 +175,32 @@ async def save_to_sheets(user_data: dict) -> bool:
 async def check_sheets_connection():
     try:
         # Fayldan emas, Railway'dan (matndan) JSONni o'qiymiz
+        if not config.GOOGLE_CREDENTIALS:
+            logger.error("GOOGLE_CREDENTIALS muhit o'zgaruvchisi topilmadi!")
+            return False
+
+        creds_dict = json.loads(config.GOOGLE_CREDENTIALS)
+
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive"
+        ]
+
+        credentials = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+        gc = gspread.authorize(credentials)
+        
+        # Test uchun jadvalni ochib ko'ramiz
+        sh = gc.open_by_key(config.GOOGLE_SHEET_ID)
+        return True
+        
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON formati noto'g'ri: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"STARTUP XATO: Google Sheets ulanish xatosi: {e}")
+        return False
+    try:
+        # Fayldan emas, Railway'dan (matndan) JSONni o'qiymiz
         creds_dict = json.loads(config.GOOGLE_CREDENTIALS)
 
         scopes = [
