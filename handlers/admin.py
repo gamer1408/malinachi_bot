@@ -11,7 +11,7 @@ router = Router()
 class AdminOrder(StatesGroup):
     waiting_for_text = State()
 
-@router.message(Command("clients"))
+@router.message(Command("adminclients"))
 async def start_client_order(message: types.Message, state: FSMContext):
     # .env dan olingan ID string bo'lgani uchun uni int ga o'tkazib tekshiramiz
     try:
