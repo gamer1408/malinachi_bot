@@ -1,4 +1,5 @@
-from aiogram import Router, types
+from aiogram import Router, types  # types ni import qilganmiz
+from aiogram.types import Message  # Mana bu qator yetishmayapti
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
