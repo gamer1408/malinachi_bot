@@ -69,10 +69,11 @@ def _build_bot_and_dp() -> tuple[Bot, Dispatcher]:
     )
     dp = Dispatcher(storage=MemoryStorage())
 
+    dp.include_router(admin_router)
     dp.include_router(start_router)         
     dp.include_router(registration_router)  
     dp.include_router(contact_router)  
-    dp.include_router(admin_router)     
+         
 
     return bot, dp
 
