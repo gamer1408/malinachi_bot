@@ -11,13 +11,9 @@ router = Router()
 class AdminOrder(StatesGroup):
     waiting_for_text = State()
 
-@router.message(Command("adminclients"))
-async def start_client_order(message: types.Message, state: FSMContext):
-    # .env dan olingan ID string bo'lgani uchun uni int ga o'tkazib tekshiramiz
-    try:
-        if message.from_user.id != int(config.ADMIN_ID):
-            return
-    except (ValueError, TypeError):
+@router.message(Command("clients")) 
+async def start_client_order(message: Message, state: FSMContext):
+    if message.from_user.id != int(config.ADMIN_ID):
         return
 
     await message.answer("Admin tasdiqlandi. Iltimos, mijoz ma'lumotlarini yuboring:")
