@@ -13,6 +13,8 @@ GOOGLE_SHEET_ID: str = os.getenv("GOOGLE_SHEET_ID", "")
 # MUHIM O'ZGARISH: Fayl qidirish o'rniga Railway o'zgaruvchisini olamiz
 GOOGLE_CREDENTIALS: str = os.getenv("GOOGLE_CREDENTIALS", "")
 
+ADMIN_ID = os.getenv('ADMIN_ID')
+
 # ─── Viloyatlar ro'yxati (14 viloyat + Qoraqalpog'iston) ──────────────────────
 REGIONS: list[str] = [
     "Toshkent sh.",

@@ -18,6 +18,8 @@ from handlers.start import router as start_router
 from handlers.registration import router as registration_router
 from handlers.contact import router as contact_router
 from services.sheets import check_sheets_connection
+from handlers.admin import router as admin_router # Tepaga qo'sh
+
 
 # ─── Logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -69,7 +71,8 @@ def _build_bot_and_dp() -> tuple[Bot, Dispatcher]:
 
     dp.include_router(start_router)         
     dp.include_router(registration_router)  
-    dp.include_router(contact_router)       
+    dp.include_router(contact_router)  
+    dp.include_router(admin_router)     
 
     return bot, dp
 
